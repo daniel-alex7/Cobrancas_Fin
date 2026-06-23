@@ -1,0 +1,30 @@
+1. Cadastro e Gestão de Clientes (/customers)
+Guarda as informações de quem vai pagar.
+
+Ela garante que você não cadastre o mesmo CPF/CNPJ duas vezes.
+
+Ela valida se o e-mail digitado é um e-mail real e válido (que foi justamente o que causou aquele erro anterior).
+
+2. Geração e Controle de Cobranças (/charges)
+Cria a ordem de pagamento para um cliente.
+
+Quando você cria uma cobrança, a API calcula o valor (em centavos, para evitar erros de arredondamento com centavos) e define uma data de vencimento.
+
+Toda cobrança nova nasce com o status de PENDING (Pendente), esperando o cliente pagar.
+
+3. Conciliação Automática via Webhook (/webhooks/payment)
+Essa é a parte mais importante. Ela automatiza a baixa do pagamento.
+
+Quando o seu cliente paga o PIX ou o Boleto no banco dele, o banco (ou intermediador como Asaas, Mercado Pago, Stripe) avisa a sua API enviando uma notificação.
+
+A sua API recebe esse aviso, procura a cobrança certa no banco de dados e muda o status dela de PENDING para PAID (Pago) automaticamente, sem que nenhum humano precise conferir o extrato bancário e dar baixa manualmente.
+
+
+
+
+
+
+
+
+
+ACESSARA: http://127.0.0.1:8000/docs
