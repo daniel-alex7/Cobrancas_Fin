@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}{{ "Editar" if servico else "Novo" }} Serviço{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 720px;">
+    <h1>{{ "Editar Serviço" if servico else "Novo Serviço" }}</h1>
+    <form method="post" id="form-servico">
+        <div class="form-grid">
+            <div class="form-field full">
+                <label>Nome do serviço</label>
+                <input type="text" name="nome" placeholder="Ex: Instalação elétrica, Corte de cabelo, Frete"
+                       value="{{ servico['nome'] if servico else '' }}" required>
+            </div>
+
+            <div class="form-field">
+                <label>Cliente (opcional)</label>
+                <input type="text" name="cliente" value="{{ servico['cliente'] if servico and servico['cliente'] else '' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Data do serviço</label>
+                <input type="date" name="data" value="{{ servico['data'] if servico else hoje }}" required>
+            </div>
+
+            <div class="form-field">
+                <label>Horas trabalhadas</label>
+                <input type="number" step="0.1" min="0" name="horas" id="horas"
+                       value="{{ servico['horas'] if servico else '' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Valor da sua hora (R$)</label>
+                <input type="number" step="0.01" min="0" name="valor_hora" id="valor_hora"
+                       value="{{ servico['valor_hora'] if servico else config['valor_hora'] }}">
+                {% if not servico %}<div class="prefill-note">Pré-preenchido com seu padrão em Configurações</div>{% endif %}
+            </div>
+
+            <div class="form-field">
+                <label>Km rodados</label>
+                <input type="number" step="0.1" min="0" name="km" id="km"
+                       value="{{ servico['km'] if servico else '' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Valor por km (R$)</label>
+                <input type="number" step="0.01" min="0" name="valor_km" id="valor_km"
+                       value="{{ servico['valor_km'] if servico else config['valor_km'] }}">
+                {% if not servico %}<div class="prefill-note">Cobre combustível + desgaste do veículo</div>{% endif %}
+            </div>
+
+            <div class="form-field">
+                <label>Despesas extras (R$)</label>
+                <input type="number" step="0.01" min="0" name="despesas" id="despesas"
+                       placeholder="Materiais, insumos, ferramentas"
+                       value="{{ servico['despesas'] if servico else '0' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Margem de lucro (%)</label>
+                <input type="number" step="1" min="0" name="margem" id="margem"
+                       value="{{ servico['margem'] if servico else config['margem_lucro'] }}">
+            </div>
+
+            <div class="form-field full">
+                <label>Preço efetivamente cobrado (R$) — deixe em branco se ainda não fechou</label>
+                <input type="number" step="0.01" min="0" name="preco_cobrado"
+                       value="{{ servico['preco_cobrado'] if servico and servico['preco_cobrado'] is not none else '' }}">
+            </div>
+
+            <div class="form-field full">
+                <label>Observações</label>
+                <textarea name="observacoes" rows="2">{{ servico['observacoes'] if servico and servico['observacoes'] else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="table-card" style="margin-top: 20px; padding: 16px 20px;">
+            <div class="breakdown" style="font-size: 13.5px;">
+                <span>Custo de mão de obra: <strong id="out-mao-obra">R$ 0,00</strong></span>
+                <span>Custo de deslocamento: <strong id="out-deslocamento">R$ 0,00</strong></span>
+                <span>Despesas: <strong id="out-despesas">R$ 0,00</strong></span>
+                <span class="total">Custo total: <span id="out-custo">R$ 0,00</span></span>
+                <span class="total" style="color: var(--brand); font-size: 16px;">Preço sugerido: <span id="out-sugerido">R$ 0,00</span></span>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('servicos') }}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Cálculo em tempo real (apenas visual — o cálculo real acontece no servidor ao salvar)
+    function num(id) {
+        const v = parseFloat(document.getElementById(id).value.replace(',', '.'));
+        return isNaN(v) ? 0 : v;
+    }
+    function brl(v) {
+        return 'R$ ' + v.toFixed(2).replace('.', ',');
+    }
+    function recalcular() {
+        const horas = num('horas'), valorHora = num('valor_hora');
+        const km = num('km'), valorKm = num('valor_km');
+        const despesas = num('despesas'), margem = num('margem');
+
+        const custoMaoObra = horas * valorHora;
+        const custoDeslocamento = km * valorKm;
+        const custoTotal = custoMaoObra + custoDeslocamento + despesas;
+        const precoSugerido = custoTotal * (1 + margem / 100);
+
+        document.getElementById('out-mao-obra').textContent = brl(custoMaoObra);
+        document.getElementById('out-deslocamento').textContent = brl(custoDeslocamento);
+        document.getElementById('out-despesas').textContent = brl(despesas);
+        document.getElementById('out-custo').textContent = brl(custoTotal);
+        document.getElementById('out-sugerido').textContent = brl(precoSugerido);
+    }
+    ['horas', 'valor_hora', 'km', 'valor_km', 'despesas', 'margem'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', recalcular);
+    });
+    recalcular();
+</script>
+{% endblock %}

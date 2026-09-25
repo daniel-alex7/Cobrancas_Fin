@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Precificação de Serviços{% endblock %}
+
+{% block content %}
+<div class="cards">
+    <div class="stat pendente">
+        <div class="label">Custo total</div>
+        <div class="value">R$ {{ "%.2f"|format(totais.custo) }}</div>
+    </div>
+    <div class="stat qtd">
+        <div class="label">Total sugerido</div>
+        <div class="value">R$ {{ "%.2f"|format(totais.sugerido) }}</div>
+    </div>
+    <div class="stat recebido">
+        <div class="label">Total cobrado (ou sugerido, se ainda não fechado)</div>
+        <div class="value">R$ {{ "%.2f"|format(totais.cobrado) }}</div>
+    </div>
+    <div class="stat {{ 'recebido' if totais.lucro >= 0 else 'atrasado' }}">
+        <div class="label">Lucro estimado</div>
+        <div class="value">R$ {{ "%.2f"|format(totais.lucro) }}</div>
+    </div>
+</div>
+
+<div class="toolbar">
+    <div class="hint">Cadastre horas, km e despesas de cada serviço para ver o preço mínimo que cobre seus custos.</div>
+    <a href="{{ url_for('servico_novo') }}" class="btn btn-primary">+ Novo Serviço</a>
+</div>
+
+<div class="table-card">
+    {% if lista %}
+    <table>
+        <thead>
+            <tr>
+                <th>Serviço</th>
+                <th>Horas / Km</th>
+                <th>Custos</th>
+                <th>Preço sugerido</th>
+                <th>Cobrado</th>
+                <th>Lucro</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in lista %}
+            {% set s = item.s %}
+            {% set calc = item.calc %}
+            <tr>
+                <td>
+                    <div class="cliente-nome">{{ s["nome"] }}</div>
+                    <div class="cliente-desc">{{ s["cliente"] or "-" }} · {{ s["data"] }}</div>
+                </td>
+                <td>{{ s["horas"] }} h · {{ s["km"] }} km</td>
+                <td>
+                    <div class="breakdown">
+                        <span>Mão de obra: R$ {{ "%.2f"|format(calc.custo_mao_obra) }}</span>
+                        <span>Deslocamento: R$ {{ "%.2f"|format(calc.custo_deslocamento) }}</span>
+                        <span>Despesas: R$ {{ "%.2f"|format(s["despesas"]) }}</span>
+                        <span class="total">Total: R$ {{ "%.2f"|format(calc.custo_total) }}</span>
+                    </div>
+                </td>
+                <td class="valor">R$ {{ "%.2f"|format(calc.preco_sugerido) }}<div class="cliente-desc">margem {{ s["margem"]|round(1) }}%</div></td>
+                <td>
+                    {% if s["preco_cobrado"] is not none %}
+                        <span class="valor">R$ {{ "%.2f"|format(s["preco_cobrado"]) }}</span>
+                    {% else %}
+                        <span class="badge badge-pendente">Não fechado</span>
+                    {% endif %}
+                </td>
+                <td class="{{ 'lucro-positivo' if calc.lucro_estimado >= 0 else 'lucro-negativo' }}">
+                    R$ {{ "%.2f"|format(calc.lucro_estimado) }}
+                </td>
+                <td>
+                    <div class="row-actions">
+                        <form action="{{ url_for('servico_gerar_cobranca', id=s['id']) }}" method="post">
+                            <button type="submit" class="btn btn-success btn-sm">Gerar cobrança</button>
+                        </form>
+                        <a href="{{ url_for('servico_editar', id=s['id']) }}" class="btn btn-secondary btn-sm">Editar</a>
+                        <form action="{{ url_for('servico_excluir', id=s['id']) }}" method="post"
+                              onsubmit="return confirm('Excluir este serviço?');">
+                            <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">Nenhum serviço cadastrado ainda. Clique em "Novo Serviço" para calcular seu primeiro preço.</div>
+    {% endif %}
+</div>
+{% endblock %}
