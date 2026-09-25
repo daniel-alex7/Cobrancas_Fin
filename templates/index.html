@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Lançamentos - Contabilidade{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card card-resumo bg-success text-white p-3">
+            <small>Total de Receitas</small>
+            <h3>R$ {{ "%.2f"|format(total_receitas) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-resumo bg-danger text-white p-3">
+            <small>Total de Despesas</small>
+            <h3>R$ {{ "%.2f"|format(total_despesas) }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-resumo bg-primary text-white p-3">
+            <small>Saldo</small>
+            <h3>R$ {{ "%.2f"|format(saldo) }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group">
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary {% if not filtro_tipo %}active{% endif %}">Todos</a>
+        <a href="{{ url_for('index', tipo='receita') }}" class="btn btn-outline-success {% if filtro_tipo == 'receita' %}active{% endif %}">Receitas</a>
+        <a href="{{ url_for('index', tipo='despesa') }}" class="btn btn-outline-danger {% if filtro_tipo == 'despesa' %}active{% endif %}">Despesas</a>
+    </div>
+    <a href="{{ url_for('novo') }}" class="btn btn-primary">+ Novo Lançamento</a>
+</div>
+
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Tipo</th>
+                <th class="text-end">Valor</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for l in lancamentos %}
+            <tr>
+                <td>{{ l["data"] }}</td>
+                <td>{{ l["descricao"] }}</td>
+                <td>{{ l["categoria"] }}</td>
+                <td>
+                    {% if l["tipo"] == "receita" %}
+                        <span class="badge bg-success">Receita</span>
+                    {% else %}
+                        <span class="badge bg-danger">Despesa</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">R$ {{ "%.2f"|format(l["valor"]) }}</td>
+                <td class="text-end">
+                    <a href="{{ url_for('editar', id=l['id']) }}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    <form action="{{ url_for('excluir', id=l['id']) }}" method="post" class="d-inline"
+                          onsubmit="return confirm('Excluir este lançamento?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Nenhum lançamento cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
