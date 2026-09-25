@@ -61,10 +61,3 @@ Calculadora para descobrir quanto cobrar por serviço, considerando
 Defina os valores padrão (valor da sua hora, valor por km, margem de lucro %) que pré-preenchem
 automaticamente todo novo serviço cadastrado — você ainda pode ajustar caso a caso.
 
-## Próximos passos sugeridos
-
-- Autenticação de usuário
-- Exportar relatório de cobranças/serviços em PDF/Excel
-- Envio automático de cobrança por e-mail/WhatsApp
-- Gráfico de recebimentos e lucro por mês e por forma de pagamento
-- Templates de serviço reutilizáveis (ex: "corte de cabelo" já com horas/despesas padrão)
