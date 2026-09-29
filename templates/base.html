@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Cobranças Fin{% endblock %}</title>
+    <title>{% block title %}Cobranças Financeiras{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="topbar">
         <a class="brand" href="{{ url_for('index') }}">
-            <span class="dot"></span> Cobranças Fin
+            <span class="dot"></span> Cobranças Financeiras
         </a>
         <nav class="nav-links">
             <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' else '' }}">Cobranças</a>
